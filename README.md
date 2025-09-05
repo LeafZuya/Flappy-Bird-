@@ -1,4 +1,4 @@
-# Flappy-Bird-
+# FLappy-Shiroko
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,25 +32,53 @@
       0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
       100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
     }
+
+    /* Tombol restart */
+    #restartBtn {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 12px 24px;
+      font-size: 20px;
+      background: linear-gradient(135deg, #00cc66, #3399ff);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    #restartBtn:hover {
+      transform: translate(-50%, -50%) scale(1.1);
+    }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <button id="restartBtn">🔄 Restart</button>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
+    const restartBtn = document.getElementById("restartBtn");
 
-    // load gambar burung custom (pakai link GitHub / lokal)
+    // load gambar burung custom
     const birdImg = new Image();
-    birdImg.src = "Iwak.jpg"; 
-    // ganti dengan nama file kamu di repo GitHub, misalnya "shiroko.png"
+    birdImg.src = "Iwak.jpg"; // ganti sesuai repo GitHub kamu
 
-    let bird = { x: 50, y: 150, width: 40, height: 40, gravity: 0.6, lift: -10, velocity: 0 };
-    let pipes = [];
-    let frame = 0;
-    let score = 0;
-    let gameOver = false;
+    let bird, pipes, frame, score, gameOver;
+
+    function resetGame() {
+      bird = { x: 50, y: 150, width: 40, height: 40, gravity: 0.6, lift: -10, velocity: 0 };
+      pipes = [];
+      frame = 0;
+      score = 0;
+      gameOver = false;
+      restartBtn.style.display = "none";
+      update();
+    }
 
     function drawBird() {
       ctx.drawImage(birdImg, bird.x - bird.width/2, bird.y - bird.height/2, bird.width, bird.height);
@@ -119,13 +147,22 @@
       ctx.font = "30px Arial";
       ctx.fillText("Game Over!", 120, 250);
       ctx.fillText("Score: " + score, 150, 300);
+
+      // tampilkan tombol restart
+      restartBtn.style.display = "block";
     }
 
+    // Kontrol burung
+    function flap() {
+      if (!gameOver) bird.velocity = bird.lift;
+    }
     document.addEventListener("keydown", (e) => {
-      if (e.code === "Space") {
-        bird.velocity = bird.lift;
-      }
+      if (e.code === "Space") flap();
     });
+    document.addEventListener("click", flap);
+    document.addEventListener("touchstart", flap);
+
+    restartBtn.addEventListener("click", resetGame);
 
     // Emoji daun dan es jatuh
     const emojis = ["🍃", "🧊"];
@@ -141,7 +178,7 @@
     }
     setInterval(createFallingEmoji, 700);
 
-    update();
+    resetGame(); // mulai game
   </script>
 </body>
 </html>
