@@ -1,9 +1,9 @@
-# Ular Dan Apel
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Snake & Apple 🍎🐍</title>
+  <title>Snake & Apple 🍎🐍 (Joystick)</title>
   <style>
     body {
       margin: 0;
@@ -21,29 +21,6 @@
       background: rgba(255,255,255,0.2);
       border: 3px solid #004d26;
       border-radius: 10px;
-    }
-
-    #controls {
-      position: absolute;
-      bottom: 20px;
-      display: grid;
-      grid-template-columns: repeat(3, 60px);
-      grid-template-rows: repeat(2, 60px);
-      gap: 10px;
-      justify-items: center;
-      align-items: center;
-    }
-
-    #controls button {
-      width: 60px;
-      height: 60px;
-      font-size: 24px;
-      border: none;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #00994d, #0066cc);
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
 
     #scoreboard {
@@ -82,6 +59,31 @@
       left: 5px;
       font-size: 40px;
     }
+
+    /* Joystick */
+    #joystick {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 120px;
+      background: rgba(255,255,255,0.1);
+      border: 3px solid #0066cc;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      touch-action: none;
+    }
+    #stick {
+      width: 50px;
+      height: 50px;
+      background: radial-gradient(circle, #00cc66, #0066cc);
+      border-radius: 50%;
+      position: absolute;
+      transition: 0.1s;
+    }
   </style>
 </head>
 <body>
@@ -90,17 +92,13 @@
   <div id="scoreboard">Score: 0 | High Score: 0</div>
   <button id="restartBtn">🔄 Restart</button>
 
-  <div id="controls">
-    <div></div>
-    <button id="up">⬆️</button>
-    <div></div>
-    <button id="left">⬅️</button>
-    <button id="down">⬇️</button>
-    <button id="right">➡️</button>
-  </div>
-
   <div id="leaf">🍃</div>
   <div id="ice">🧊</div>
+
+  <!-- Joystick -->
+  <div id="joystick">
+    <div id="stick"></div>
+  </div>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -173,21 +171,6 @@
       updateScore();
     }
 
-    document.addEventListener("keydown", directionControl);
-
-    function directionControl(event) {
-      if (event.keyCode === 37 && direction !== "RIGHT") direction = "LEFT";
-      else if (event.keyCode === 38 && direction !== "DOWN") direction = "UP";
-      else if (event.keyCode === 39 && direction !== "LEFT") direction = "RIGHT";
-      else if (event.keyCode === 40 && direction !== "UP") direction = "DOWN";
-    }
-
-    // GamePad buttons
-    document.getElementById("up").onclick = () => { if(direction !== "DOWN") direction = "UP"; };
-    document.getElementById("down").onclick = () => { if(direction !== "UP") direction = "DOWN"; };
-    document.getElementById("left").onclick = () => { if(direction !== "RIGHT") direction = "LEFT"; };
-    document.getElementById("right").onclick = () => { if(direction !== "LEFT") direction = "RIGHT"; };
-
     // Restart button
     document.getElementById("restartBtn").onclick = () => {
       snake = [{x: 9 * box, y: 10 * box}];
@@ -198,6 +181,40 @@
       game = setInterval(draw, 100);
       updateScore();
     };
+
+    // === Joystick Control ===
+    const joystick = document.getElementById("joystick");
+    const stick = document.getElementById("stick");
+
+    let centerX, centerY;
+    joystick.addEventListener("touchstart", (e) => {
+      const rect = joystick.getBoundingClientRect();
+      centerX = rect.left + rect.width / 2;
+      centerY = rect.top + rect.height / 2;
+    });
+
+    joystick.addEventListener("touchmove", (e) => {
+      const touch = e.touches[0];
+      const dx = touch.clientX - centerX;
+      const dy = touch.clientY - centerY;
+
+      const angle = Math.atan2(dy, dx);
+      const distance = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
+
+      stick.style.transform = `translate(${dx}px, ${dy}px)`;
+
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0 && direction !== "LEFT") direction = "RIGHT";
+        else if (dx < 0 && direction !== "RIGHT") direction = "LEFT";
+      } else {
+        if (dy > 0 && direction !== "UP") direction = "DOWN";
+        else if (dy < 0 && direction !== "DOWN") direction = "UP";
+      }
+    });
+
+    joystick.addEventListener("touchend", () => {
+      stick.style.transform = "translate(0,0)";
+    });
 
     let game = setInterval(draw, 100);
   </script>
