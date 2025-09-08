@@ -1,4 +1,4 @@
-# LeafCy AI 
+# LeafCy AI
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -213,6 +213,24 @@
             transform: scale(1.03);
         }
         
+        .refresh-button {
+            padding: 15px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .refresh-button:hover {
+            transform: scale(1.03);
+        }
+        
         .suggestion-chips {
             display: flex;
             flex-wrap: wrap;
@@ -324,8 +342,13 @@
             margin-top: 5px;
         }
 
-        .send-button:active {
+        .send-button:active, .refresh-button:active {
             transform: scale(0.98);
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 10px;
         }
     </style>
 </head>
@@ -397,7 +420,12 @@
                 
                 <div class="chat-input-container">
                     <input type="text" class="chat-input" id="userInput" placeholder="Tanyakan sesuatu kepada LeafCy...">
-                    <button class="send-button" id="sendButton">Kirim <i class="fas fa-paper-plane"></i></button>
+                    <div class="button-container">
+                        <button class="send-button" id="sendButton">Kirim <i class="fas fa-paper-plane"></i></button>
+                        <button class="refresh-button" id="refreshButton" title="Hapus semua percakapan">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -405,15 +433,19 @@
 
     <script>
         // Inisialisasi variabel global
-        let chatMessages, userInput, sendButton;
+        let chatMessages, userInput, sendButton, refreshButton;
 
         document.addEventListener('DOMContentLoaded', function() {
             chatMessages = document.getElementById('chatMessages');
             userInput = document.getElementById('userInput');
             sendButton = document.getElementById('sendButton');
+            refreshButton = document.getElementById('refreshButton');
             
             // Event listener untuk tombol kirim
             sendButton.addEventListener('click', sendMessage);
+            
+            // Event listener untuk tombol refresh
+            refreshButton.addEventListener('click', refreshConversation);
             
             // Event listener untuk menekan enter pada input
             userInput.addEventListener('keypress', function(e) {
@@ -547,6 +579,19 @@
         function sendSuggestion(suggestion) {
             userInput.value = suggestion;
             sendMessage();
+        }
+        
+        // Fungsi untuk me-refresh/menghapus percakapan
+        function refreshConversation() {
+            if (confirm("Apakah Anda yakin ingin menghapus semua percakapan?")) {
+                // Hapus semua pesan kecuali pesan pembuka
+                while (chatMessages.children.length > 1) {
+                    chatMessages.removeChild(chatMessages.lastChild);
+                }
+                
+                // Tampilkan pesan konfirmasi
+                addBotMessage("Percakapan telah dihapus. Ada yang bisa saya bantu?");
+            }
         }
     </script>
 </body>
